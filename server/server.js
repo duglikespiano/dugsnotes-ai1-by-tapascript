@@ -3,8 +3,10 @@ import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import { GoogleGenAI } from '@google/genai';
 
 const app = express();
+const PORT = process.env.PORT || 3001;
 
 //Security Middleware
 app.use(helmet());
@@ -18,24 +20,40 @@ app.use(
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
 	max: 100,
-	message: 'Too many requests from this IP, please try agai nafter some time',
+	message: 'Too many requests from this IP, please try again after some time',
 });
 app.use(limiter);
 
 app.use(express.json({ limit: '10mb' }));
 
-app.post('/api/explain-code', async (req, res) => {
+const main = async (code, language, res) => {
+	const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 	try {
-		const { code, language } = req.body;
-		if (!code) {
-			return res.status(400).json({ error: 'Code is required!' });
-		}
+		const response = await ai.models.generateContent({
+			model: 'gemini-2.5-flash-lite', // Use the latest flash model
+			systemInstruction: 'You are a concise code reviewer. Limit response to 100 words.',
+			contents: `Analyze this ${language} code: ${code}`,
+			config: {
+				maxOutputTokens: 250,
+				temperature: 0.2,
+			},
+		});
 
-		if (!language) {
-			return res.status(400).json({ error: 'Language is required!' });
-		}
-	} catch (e) {
-		console.error(`Code Explain API Error: ${e}`);
-		res.status(500).json({ error: 'Server error', details: e.message });
+		res.json({ explanation: response.text, language: language || 'unknown' });
+	} catch (error) {
+		console.error('AI Error:', error);
+		res.status(500).json({ error: 'Analysis failed' });
 	}
+};
+
+// Update your route to pass 'res'
+app.post('/api/explain-code', async (req, res) => {
+	const { code, language } = req.body;
+	if (!code || !language) return res.status(400).json({ error: 'Missing fields' });
+
+	await main(code, language, res);
+});
+
+app.listen(PORT, () => {
+	console.log(`API server is listening on port ${PORT}`);
 });
