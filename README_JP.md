@@ -15,7 +15,7 @@
 
 - Project タイトル : dugsnotes_ai1_by_tapascript
 - 関連 URL : https://youtu.be/W4M-g9wsEC4?si=are7sMGkJZwplS7g
-- 期間 : 2025.12.28 - 進行中
+- 期間 : 2025.12.28 - 2025.12.28
 - 人員 : 1 人
 - 技術スタック : </br>
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=HTML5&logoColor=white">
