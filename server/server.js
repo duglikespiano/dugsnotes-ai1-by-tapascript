@@ -31,10 +31,11 @@ const main = async (code, language, res) => {
 	try {
 		const response = await ai.models.generateContent({
 			model: 'gemini-2.5-flash-lite', // Use the latest flash model
-			systemInstruction: 'You are a concise code reviewer. Limit response to 100 words.',
+			systemInstruction:
+				'You are a concise code reviewer. please review the code as easily as possible. I hope your answer does not exceed 500 words but the document should be fully formatted. do not just stop while describing.',
 			contents: `Analyze this ${language} code: ${code}`,
 			config: {
-				maxOutputTokens: 250,
+				// maxOutputTokens: 250,
 				temperature: 0.2,
 			},
 		});
